@@ -42,6 +42,7 @@ class ViewController: NSViewController {
         return nil
     }
     
+
     
 
    // var SelectedPath: String = ""
@@ -78,24 +79,28 @@ class ViewController: NSViewController {
     func  moveFileToDeskTop (from: String, to: String) {
         
         let fileName = (from as NSString).lastPathComponent
+        let folder = (from as NSString).deletingLastPathComponent
+        
+
         
         do
         {
             
             try fm.moveItem(atPath: from, toPath: to + fileName)
             
+            try fm.moveItem(atPath: from + " alias", toPath: folder + "/." + fileName + "_alias")
             
             if isKeyPresentInUserDefaults(key: "alias") {
                 
                 var myarray = self.fileChange.stringArray(forKey: "alias") ?? [String]()
                 
-                myarray.append(from + " alias")
+                 myarray.append(folder + "/." + fileName + "_alias")
                 //myarray = []
                 fileChange.set(myarray, forKey: "alias")
             }
             else
             {
-                let myarray = [from]
+                let myarray = [folder + "/." + fileName + "_alias"]
                 fileChange.set(myarray, forKey: "alias")
             }
             
@@ -170,16 +175,18 @@ class ViewController: NSViewController {
     func checkBack() {
         let newFile = FileMove.shared.backPath
         
+        let fileName = (newFile! as NSString).lastPathComponent
+       
+      //  let originalLocation =
+        
+       
+        
         var aliasArray = fileChange.stringArray(forKey: "alias") ?? [String]()
         
         var compareArray: [String] = []
         
         for alias in aliasArray {
         
-            //let fullPath = "file://" + alias
-            
-            
-            
             
         let escapedString = ("file://" + alias).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
          let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
@@ -189,24 +196,52 @@ class ViewController: NSViewController {
               compareArray.append(original!)
             }
             else{
-                Swift.print(escapedString!)
+                //Swift.print(escapedString!)
+                
+                do{
+                  let route = (alias as NSString).deletingLastPathComponent
+                  try fm.moveItem(atPath: newFile!, toPath: route + "/" + fileName)
+                    usleep(1000000)
+                   let newOriginal = resolveFinderAlias(at: URL(string: (escapedString)!)!)
+                    if newOriginal != nil{
+                        
+                      resultField.stringValue = "Warning: Moved file to location"
+                        if route == "/Users/tomzhangle/From_Desktop" {
+                            reloadFileList()
+                        }
+                        else
+                        {
+                        let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+                            
+                            urlFile = URL(string:escaped!)
+                            directoryFiles = Directory(folderURL: urlFile!)
+                            reloadFileListFiles()
+                        }
+                        
+                    }
+                    else
+                    {
+                       try fm.moveItem(atPath:  route + "/" + fileName, toPath: newFile!)
+                       resultField.stringValue = "Error: Failed to move file back"
+                    }
+                    
+                    try fm.removeItem(atPath: alias)
+                    
+            }
+                catch {
+                    resultField.stringValue = "Error copying files"
+                }
+                
                 return
             }
             
            // compareArray.append(escapedString!)
         }
         
-        Swift.print("newFile")
-        Swift.print(newFile!)
-        Swift.print("compareArray")
-        Swift.print(compareArray)
-        
         
         if compareArray.contains(newFile!){
             let index = compareArray.index(of: newFile!)
             let originalLocation = aliasArray[index!]
-            
-            let fileName = (newFile! as NSString).lastPathComponent
             let route = (originalLocation as NSString).deletingLastPathComponent
             
             do {
@@ -255,7 +290,9 @@ func updateFileView(){
         let itemsSelected = fileView.selectedRow
         
         //Swift.print(String(itemsSelected))
-    if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
+    if  !(itemsSelected >= 0 && itemsSelected < directoryItemsFiles!.count) {
+        FileMove.shared.path = nil
+        FileMove.shared.left = false
         return
     }
         let item = directoryItemsFiles![itemsSelected]
@@ -281,6 +318,8 @@ func updateFileView(){
         //Swift.print(String(itemsSelected))
         
         if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
+            FileMove.shared.path = nil
+            FileMove.shared.left = true
                 return
         }
         let item = directoryItems![itemsSelected]
