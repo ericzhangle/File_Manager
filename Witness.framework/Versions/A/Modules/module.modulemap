@@ -1,0 +1,10 @@
+framework module Witness {
+  umbrella header "Witness.h"
+
+  export *
+  module * { export * }
+}
+
+module Witness.Swift {
+    header "Witness-Swift.h"
+}

@@ -82,7 +82,11 @@ class NSViewNew: NSView {
             droppedFilePath = imagePath
             
             let fileName = (droppedFilePath! as NSString).lastPathComponent
-           
+            
+            FileMove.shared.backPath = droppedFilePath!
+            
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "checkBack"), object: nil)
+           /*
             let fm = FileManager.default
             do
             {
@@ -96,7 +100,7 @@ class NSViewNew: NSView {
             } catch{
                 resultField.stringValue = "failed to move file"
             }
-            
+            */
 
             
             return true

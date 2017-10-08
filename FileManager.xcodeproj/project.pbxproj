@@ -11,6 +11,9 @@
 		E6CDC4A11F889DCC00C7AA6B /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CDC4A01F889DCC00C7AA6B /* WindowController.swift */; };
 		E6CDC4A31F88B0D100C7AA6B /* Table1.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CDC4A21F88B0D100C7AA6B /* Table1.swift */; };
 		E6CDC4A51F88FC4C00C7AA6B /* FileMove.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CDC4A41F88FC4C00C7AA6B /* FileMove.swift */; };
+		E6CDC4A71F894CB700C7AA6B /* Witness.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6CDC4A61F894CB700C7AA6B /* Witness.framework */; };
+		E6CDC4A81F894CB700C7AA6B /* Witness.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E6CDC4A61F894CB700C7AA6B /* Witness.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E6CDC4AC1F894D0C00C7AA6B /* Witness.framework.dSYM in CopyFiles */ = {isa = PBXBuildFile; fileRef = E6CDC4AB1F894D0C00C7AA6B /* Witness.framework.dSYM */; };
 		E6D0898A1F87DC38009357DF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D089891F87DC38009357DF /* AppDelegate.swift */; };
 		E6D0898C1F87DC38009357DF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D0898B1F87DC38009357DF /* ViewController.swift */; };
 		E6D0898E1F87DC38009357DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E6D0898D1F87DC38009357DF /* Assets.xcassets */; };
@@ -37,11 +40,37 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E6CDC4A91F894CB700C7AA6B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E6CDC4A81F894CB700C7AA6B /* Witness.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6CDC4AA1F894CD500C7AA6B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				E6CDC4AC1F894D0C00C7AA6B /* Witness.framework.dSYM in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		E6CDC49E1F889C9D00C7AA6B /* Directory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Directory.swift; path = ../Directory.swift; sourceTree = "<group>"; };
 		E6CDC4A01F889DCC00C7AA6B /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		E6CDC4A21F88B0D100C7AA6B /* Table1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Table1.swift; sourceTree = "<group>"; };
 		E6CDC4A41F88FC4C00C7AA6B /* FileMove.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileMove.swift; sourceTree = "<group>"; };
+		E6CDC4A61F894CB700C7AA6B /* Witness.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Witness.framework; sourceTree = "<group>"; };
+		E6CDC4AB1F894D0C00C7AA6B /* Witness.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; path = Witness.framework.dSYM; sourceTree = "<group>"; };
 		E6D089861F87DC38009357DF /* FileManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FileManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6D089891F87DC38009357DF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E6D0898B1F87DC38009357DF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -62,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6CDC4A71F894CB700C7AA6B /* Witness.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +115,8 @@
 		E6D0897D1F87DC38009357DF = {
 			isa = PBXGroup;
 			children = (
+				E6CDC4AB1F894D0C00C7AA6B /* Witness.framework.dSYM */,
+				E6CDC4A61F894CB700C7AA6B /* Witness.framework */,
 				E6D089881F87DC38009357DF /* FileManager */,
 				E6D0899A1F87DC38009357DF /* FileManagerTests */,
 				E6D089A51F87DC38009357DF /* FileManagerUITests */,
@@ -147,6 +179,8 @@
 				E6D089821F87DC38009357DF /* Sources */,
 				E6D089831F87DC38009357DF /* Frameworks */,
 				E6D089841F87DC38009357DF /* Resources */,
+				E6CDC4A91F894CB700C7AA6B /* Embed Frameworks */,
+				E6CDC4AA1F894CD500C7AA6B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -420,6 +454,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = FileManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.exapmle.FileManager;
@@ -433,6 +471,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = FileManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.exapmle.FileManager;

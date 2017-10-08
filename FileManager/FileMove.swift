@@ -10,6 +10,8 @@ public class FileMove {
     public var path: String? = nil
     public var left: Bool = true
     
+    public var backPath: String? = nil
+    
     public func printPath() {
         Swift.print( self.path!)
     }
