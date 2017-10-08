@@ -89,7 +89,8 @@ class ViewController: NSViewController {
                 
                 var myarray = self.fileChange.stringArray(forKey: "alias") ?? [String]()
                 
-                myarray.append(from)
+                myarray.append(from + " alias")
+                //myarray = []
                 fileChange.set(myarray, forKey: "alias")
             }
             else
@@ -129,14 +130,14 @@ class ViewController: NSViewController {
         
         if from != nil {
    
-                Swift.print(from!)
+                //Swift.print(from!)
                // Swift.print(to)
                 let decodeFrom = from!.removingPercentEncoding
                 let fileName = (decodeFrom! as NSString).lastPathComponent
                 Swift.print(fileName)
                 
-                let myGroup = DispatchGroup()
-                myGroup.enter()
+               // let myGroup = DispatchGroup()
+               // myGroup.enter()
                 let task:Process = Process()
                 
                 let aliasString = "make new alias to file (posix file \"" + decodeFrom!
@@ -149,14 +150,15 @@ class ViewController: NSViewController {
                 task.arguments = ["-e","tell application \"Finder\"","-e",aliasString, "-e", "end tell"]
                 
                 task.launch()
-                
-                myGroup.leave() //// When your task completes
-                myGroup.notify(queue: DispatchQueue.main) {
-                    moveFileToDeskTop(decodeFrom!, to)
+                usleep(500000)
+                moveFileToDeskTop(from: decodeFrom!, to: to)
+                usleep(500000)
+            let escapedString = ("file://" + decodeFrom! + " alias").addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+            //let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
+             _ = resolveFinderAlias(at: URL(string: (escapedString)!)!)
 
         }
     }
-}
     
    // @IBOutlet weak var showFolders: NSScrollView!
     
@@ -168,15 +170,28 @@ class ViewController: NSViewController {
     func checkBack() {
         let newFile = FileMove.shared.backPath
         
-        let aliasArray = fileChange.stringArray(forKey: "alias") ?? [String]()
+        var aliasArray = fileChange.stringArray(forKey: "alias") ?? [String]()
         
         var compareArray: [String] = []
         
         for alias in aliasArray {
+        
+            //let fullPath = "file://" + alias
+            
+            
+            
             
         let escapedString = ("file://" + alias).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
          let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
-            compareArray.append(original!)
+            
+            if (original != nil)
+            {
+              compareArray.append(original!)
+            }
+            else{
+                Swift.print(escapedString!)
+                return
+            }
             
            // compareArray.append(escapedString!)
         }
@@ -199,26 +214,50 @@ class ViewController: NSViewController {
                 
                 try  fm.removeItem(atPath: originalLocation)
                 try fm.moveItem(atPath: newFile!, toPath: route + "/" + fileName)
+                
+                aliasArray.remove(at:index!)
+                fileChange.set(aliasArray, forKey: "alias")
+                
                 resultField.stringValue = "file put back"
+                if route == "/Users/tomzhangle/From_Desktop" {
+                    reloadFileList()
+                }
+                else
+                {
+                    
+                let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+                    
+                urlFile = URL(string:escaped!)
+                directoryFiles = Directory(folderURL: urlFile!)
+                reloadFileListFiles()
+                    
+                }
+                
             } catch {
                 resultField.stringValue = "\(error)"
             }
         }
+        else {
+            
+        }
         
         
-    }
-    
-    func reloadFileListFiles() {
+}
+
+func reloadFileListFiles() {
         directoryItemsFiles = directoryFiles?.contentsOrderedBy(sortOrder, ascending: sortAscending)
         self.dataSource1.paths = directoryItemsFiles ?? []
         //Swift.print("result:" + String(self.dataSource1.paths?.count ?? 0))
         fileView.reloadData()
     }
     
-    func updateFileView(){
+func updateFileView(){
         let itemsSelected = fileView.selectedRow
         
         //Swift.print(String(itemsSelected))
+    if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
+        return
+    }
         let item = directoryItemsFiles![itemsSelected]
         
         let urlString = directoryFiles!.url.path + "/" + item.name
@@ -241,7 +280,7 @@ class ViewController: NSViewController {
         Swift.print("select")
         //Swift.print(String(itemsSelected))
         
-        if  itemsSelected >= directoryItems!.count {
+        if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
                 return
         }
         let item = directoryItems![itemsSelected]
@@ -271,14 +310,14 @@ class ViewController: NSViewController {
         }else {
             directoryFiles = nil
             
-           // Swift.print("empty")
+            resultField.stringValue = resolveFinderAlias(at: URL(string: "file://" + escapedString!)!) ?? "not alias"
         }
         
         reloadFileListFiles()
 
        // resultField.stringValue = filePath
-    }
-    
+}
+
     func tableViewSelectionDidChange(_ notification: Notification) {
        // Swift.print("update")
         updateStatus()
@@ -298,9 +337,7 @@ class ViewController: NSViewController {
         
         
         reloadFileList()
-        
 
-        
         
         self.dataSource1 = Table1()
         self.dataSource1.paths = []
@@ -311,13 +348,19 @@ class ViewController: NSViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateFileView),name:NSNotification.Name(rawValue: "fileSelected"), object: nil)
          NotificationCenter.default.addObserver(self, selector: #selector(self.checkBack),name:NSNotification.Name(rawValue: "checkBack"), object: nil)
+        //let escapedString = "file:///Users/tomzhangle/From_Desktop/IoT%20pics/screen%20shot%202017-10-03%20at%209.08.43%20pm.png%20alias"
         
-        Swift.print(fileChange.stringArray(forKey: "alias") ?? [String]())
+        
+        //Screen%20Shot%202017%2D10%2D04%20at%209.57.42%20AM.png%20alias"
+        let array = fileChange.stringArray(forKey: "alias") ?? [String]()
 
-    }
+        //Swift.print(resolveFinderAlias(at: URL(string: (escapedString))!) ?? "not found")
+        Swift.print(array)
+        }
     //let array = fileChange.stringArray(forKey: "alias") ?? [String]()
 
 }
+
 
 extension ViewController: NSTableViewDataSource {
     
@@ -327,7 +370,7 @@ extension ViewController: NSTableViewDataSource {
 }
 
 
-    extension ViewController: NSTableViewDelegate {
+extension ViewController: NSTableViewDelegate {
     
     fileprivate enum CellIdentifiers {
             static let Folders = "Folders"
@@ -354,24 +397,8 @@ extension ViewController: NSTableViewDataSource {
             text = item.name
             cellIdentifier = CellIdentifiers.Folders
         }
-        /*
-        else if tableColumn == tableView.tableColumns[1] {
-            text = item.name
-            cellIdentifier = CellIdentifiers.RightFile
-            
-        }*/
-        
-        
-            /*
-            text = dateFormatter.string(from: item.date)
-            cellIdentifier = CellIdentifiers.DateCell
-        } else if tableColumn == tableView.tableColumns[2] {
-            text = item.isFolder ? "--" : sizeFormatter.string(fromByteCount: item.size)
-            cellIdentifier = CellIdentifiers.SizeCell
-        }*/
-        
-        // 3
-        if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+
+            if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView{
             cell.textField?.stringValue = text
             cell.imageView?.image = image ?? nil
             return cell
