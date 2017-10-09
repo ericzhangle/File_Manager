@@ -732,11 +732,11 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="FileManager" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl" customClass="NSViewNew" customModule="FileManager" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="383"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pFr-Cs-wAs">
-                                <rect key="frame" x="0.0" y="52" width="160" height="218"/>
+                                <rect key="frame" x="0.0" y="165" width="160" height="218"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" ambiguous="YES" id="N49-EW-g9Z">
                                     <rect key="frame" x="1" y="0.0" width="158" height="217"/>
@@ -806,7 +806,7 @@
                                 </tableHeaderView>
                             </scrollView>
                             <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MxG-d7-DtS" userLabel="Show Files">
-                                <rect key="frame" x="163" y="52" width="236" height="218"/>
+                                <rect key="frame" x="163" y="165" width="236" height="218"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" ambiguous="YES" id="dDz-NI-lns">
                                     <rect key="frame" x="1" y="0.0" width="234" height="217"/>
@@ -876,7 +876,7 @@
                                 </tableHeaderView>
                             </scrollView>
                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xwf-mB-bOQ">
-                                <rect key="frame" x="-2" y="0.0" width="332" height="26"/>
+                                <rect key="frame" x="-2" y="6" width="345" height="133"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" title="Multiline Label" id="Vdz-DM-9ki">
                                     <font key="font" metaFont="system"/>
@@ -885,7 +885,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="h3z-mO-OZW">
-                                <rect key="frame" x="324" y="10" width="87" height="16"/>
+                                <rect key="frame" x="355" y="141" width="87" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Load To Desk" bezelStyle="rounded" alignment="center" controlSize="mini" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EbS-3s-Y3l">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -893,6 +893,17 @@
                                 </buttonCell>
                                 <connections>
                                     <action selector="buttonClicked:" target="XfG-lQ-9wD" id="nBG-WW-Ozw"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CWt-xT-NKE">
+                                <rect key="frame" x="355" y="118" width="71" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" controlSize="mini" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5Op-iN-HQK">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="miniSystem"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="deleteStorage:" target="XfG-lQ-9wD" id="627-CV-L2j"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -910,7 +921,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="64" y="570"/>
+            <point key="canvasLocation" x="64" y="626.5"/>
         </scene>
     </scenes>
     <resources>

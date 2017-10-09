@@ -10,6 +10,27 @@ import Cocoa
 import Witness
 
 
+extension String {
+    
+    func fileName() -> String {
+        
+        if let fileNameWithoutExtension = NSURL(fileURLWithPath: self).deletingPathExtension?.lastPathComponent {
+            return fileNameWithoutExtension
+        } else {
+            return ""
+        }
+    }
+    
+    func fileExtension() -> String {
+        
+        if let fileExtension = NSURL(fileURLWithPath: self).pathExtension {
+            return fileExtension
+        } else {
+            return ""
+        }
+    }
+}
+
 class ViewController: NSViewController {
     
     let sizeFormatter = ByteCountFormatter()
@@ -21,9 +42,20 @@ class ViewController: NSViewController {
     let urlMain = URL(string: "file:///Users/tomzhangle/From_Desktop/")
     var urlFile: URL?
     let fm = FileManager.default
-    
+
+    //var currentFile: String?
     let fileChange = UserDefaults.standard
+    var from: String?
+    
+    var start: CFAbsoluteTime!
    
+    @IBAction func deleteStorage(_ sender: Any) {
+        let array: [String] = []
+        
+        //myarray = []
+        fileChange.set(array, forKey: "alias")
+        
+    }
     
     
     //var witness: Witness?
@@ -74,28 +106,111 @@ class ViewController: NSViewController {
 
         }
     }
-
+    func getString(title: String, question: String, defaultValue: String) -> [String] {
+        let msg = NSAlert()
+        msg.addButton(withTitle: "OK")      // 1st button
+        msg.addButton(withTitle: "Replace") // 2st button
+        msg.addButton(withTitle: "Cancel")  // 3nd button
+        msg.messageText = title
+        msg.informativeText = question
+        
+        let txt = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        txt.stringValue = defaultValue
+        
+        msg.accessoryView = txt
+        let response: NSModalResponse = msg.runModal()
+        
+        if (response == NSAlertFirstButtonReturn) {
+            if txt.stringValue == "" {
+                return [""]
+            }
+            else{
+                return ["txt",txt.stringValue]
+            }
+        }
+        else if response == 1001 && txt.stringValue != ""{
+            return ["replace", txt.stringValue]
+        }
+        else {
+            return [""]
+        }
+    }
+    
+    func decideFileName (path: String) -> [String] {
+        let fileName = (path as NSString).lastPathComponent
+        let folder = (path as NSString).deletingLastPathComponent
+        var newFileName = fileName
+        //Swift.print(path)
+        var fSuffix = 1
+        var userFileName: String = newFileName
+        var newUserFileName: String = ""
+        Swift.print(folder)
+        while  (newUserFileName == "" && fm.fileExists(atPath: folder + "/" + userFileName)) || (newUserFileName != "" && newUserFileName != userFileName && fm.fileExists(atPath: folder + "/" + newUserFileName) )
+        {   if newUserFileName != "" {
+            userFileName = newUserFileName
+            }
+            Swift.print("funny")
+            var response = getString(title:"Duplicated Name",question: "Duplicated file name found at dektop, enter a name or hit enter",defaultValue: userFileName)
+            if response[0] == "txt"{
+                newUserFileName = response[1]
+            }
+            else if (response[0] == "replace" && fm.fileExists(atPath: folder + "/" + response[1])) {
+                do {
+                    try fm.removeItem(atPath: folder + "/" + response[1])
+                }
+                catch {
+                    resultField.stringValue = "\(error)"
+                    Swift.print(error)
+                }
+                return ["txt",response[1]]
+            }
+            else if response[0] == "" {
+                return [""]
+            }
+            else
+            {
+                resultField.stringValue = "no file to be replaced, cancell operation"
+                return [""]
+            }
+            
+        }
+        
+        if newUserFileName == "" || newUserFileName == userFileName {
+            while fm.fileExists(atPath: folder + "/" + newFileName){
+                newFileName =  newFileName.fileName() + " " + String(fSuffix) + "." + newFileName.fileExtension()
+                fSuffix = fSuffix + 1
+            }
+            return ["txt",newFileName]
+        }
+        else
+        {
+            return ["txt",newUserFileName]
+        }
+        
+    }
    
     func  moveFileToDeskTop (from: String, to: String) {
         
-        let fileName = (from as NSString).lastPathComponent
+        let fileName = (to as NSString).lastPathComponent
+        
+        let oldName = (from as NSString).lastPathComponent
         let folder = (from as NSString).deletingLastPathComponent
-        
+      //  var newFileName = fileName
 
-        
         do
         {
+            try fm.moveItem(atPath: from, toPath: to)
             
-            try fm.moveItem(atPath: from, toPath: to + fileName)
             
+            usleep(300000)
             try fm.moveItem(atPath: from + " alias", toPath: folder + "/." + fileName + "_alias")
-            
+            usleep(300000)
             if isKeyPresentInUserDefaults(key: "alias") {
                 
-                var myarray = self.fileChange.stringArray(forKey: "alias") ?? [String]()
+                var myarray = fileChange.stringArray(forKey: "alias") ?? [String]()
                 
                  myarray.append(folder + "/." + fileName + "_alias")
-                //myarray = []
+               //myarray = []
                 fileChange.set(myarray, forKey: "alias")
             }
             else
@@ -107,8 +222,13 @@ class ViewController: NSViewController {
             //try fm.linkItem(atPath: decodeFrom! + "_alias", toPath: to + fileName)
             
             
+            if (fileName == oldName){
+                 resultField.stringValue = "loaded to desktop"
+            }
+            else{
+                resultField.stringValue = "file name changed to :" + fileName
+            }
             
-            resultField.stringValue = "loaded to desktop"
             if FileMove.shared.left {
                 directory = Directory(folderURL: self.urlMain!)
                 reloadFileList()
@@ -120,6 +240,7 @@ class ViewController: NSViewController {
             
         } catch{
             resultField.stringValue = "\(error)"
+            Swift.print(error)
         }
         
     }
@@ -127,42 +248,64 @@ class ViewController: NSViewController {
 
     @IBAction func buttonClicked(_ sender: Any) {
         
-    
-        let from: String? = FileMove.shared.path
+        if FileMove.shared.path! == from
+        {
+            let elapsed = CFAbsoluteTimeGetCurrent() - start
+            
+            //Swift.print(elapsed)
+            if elapsed < 5 {
+                resultField.stringValue = "too fast operation"
+                return
+                
+            }
+        }
+        else
+        {
+            start = CFAbsoluteTimeGetCurrent()
+        }
+       
+        from = FileMove.shared.path
         
-    
-        let to = "/Users/tomzhangle/Desktop/"
+
         
         if from != nil {
-   
-                //Swift.print(from!)
-               // Swift.print(to)
-                let decodeFrom = from!.removingPercentEncoding
-                let fileName = (decodeFrom! as NSString).lastPathComponent
-                Swift.print(fileName)
+            
+            let decodeFrom = from!.removingPercentEncoding
+            
+            let fileName = (decodeFrom! as NSString).lastPathComponent
+            
+            let to = "/Users/tomzhangle/Desktop/"
+            
+            let response = decideFileName(path: to + fileName)
+            var newFileName: String = fileName
+            
+            if response[0] == "txt" {
+                newFileName = response[1]
+            }
+            else if response[0] == ""{
+                return
+            }
+
+            let task:Process = Process()
                 
-               // let myGroup = DispatchGroup()
-               // myGroup.enter()
-                let task:Process = Process()
-                
-                let aliasString = "make new alias to file (posix file \"" + decodeFrom!
-                    + "\") at POSIX file \"" + (decodeFrom! as NSString).deletingLastPathComponent + "\""
-                
-                Swift.print(aliasString)
+           let aliasString = "make new alias file to (posix file \"" + decodeFrom! + "\") at POSIX file \"" + (decodeFrom! as NSString).deletingLastPathComponent + "\""
+            
+            // let aliasString = "make new alias file to (posix file \"" + decodeFrom! + "\") at desktop"
+
+            
+             //   Swift.print(aliasString)
                 //POSIX file \"/Users/tomzhangle/Desktop/lab5\""
                 
                 task.launchPath = "/usr/bin/osascript"
                 task.arguments = ["-e","tell application \"Finder\"","-e",aliasString, "-e", "end tell"]
-                
+                Swift.print(aliasString)
                 task.launch()
-                usleep(500000)
-                moveFileToDeskTop(from: decodeFrom!, to: to)
-                usleep(500000)
-            let escapedString = ("file://" + decodeFrom! + " alias").addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-            //let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
-             _ = resolveFinderAlias(at: URL(string: (escapedString)!)!)
-
+                usleep(300000)
+                moveFileToDeskTop(from: decodeFrom!, to: to + newFileName)
+                usleep(300000)
+                FileMove.shared.path = nil
         }
+        
     }
     
    // @IBOutlet weak var showFolders: NSScrollView!
@@ -176,8 +319,8 @@ class ViewController: NSViewController {
         let newFile = FileMove.shared.backPath
         
         let fileName = (newFile! as NSString).lastPathComponent
-       
-      //  let originalLocation =
+
+        
         
        
         
@@ -201,7 +344,7 @@ class ViewController: NSViewController {
                 do{
                   let route = (alias as NSString).deletingLastPathComponent
                   try fm.moveItem(atPath: newFile!, toPath: route + "/" + fileName)
-                    usleep(1000000)
+                    usleep(300000)
                    let newOriginal = resolveFinderAlias(at: URL(string: (escapedString)!)!)
                     if newOriginal != nil{
                         
@@ -227,6 +370,10 @@ class ViewController: NSViewController {
                     
                     try fm.removeItem(atPath: alias)
                     
+                    let index = aliasArray.index(of: alias)
+                    aliasArray.remove(at:index!)
+                    fileChange.set(aliasArray, forKey: "alias")
+                    
             }
                 catch {
                     resultField.stringValue = "Error copying files"
@@ -248,6 +395,7 @@ class ViewController: NSViewController {
                 //directoryItemsFiles = try fm.contentsOfDirectory(atPath: rightPath)
                 
                 try  fm.removeItem(atPath: originalLocation)
+                usleep(300000)
                 try fm.moveItem(atPath: newFile!, toPath: route + "/" + fileName)
                 
                 aliasArray.remove(at:index!)
@@ -255,7 +403,7 @@ class ViewController: NSViewController {
                 
                 resultField.stringValue = "file put back"
                 if route == "/Users/tomzhangle/From_Desktop" {
-                    reloadFileList()
+                   reloadFileList()
                 }
                 else
                 {
@@ -273,6 +421,9 @@ class ViewController: NSViewController {
             }
         }
         else {
+            
+            
+            
             
         }
         
@@ -349,7 +500,7 @@ func updateFileView(){
         }else {
             directoryFiles = nil
             
-            resultField.stringValue = resolveFinderAlias(at: URL(string: "file://" + escapedString!)!) ?? "not alias"
+           // resultField.stringValue = resolveFinderAlias(at: URL(string: "file://" + escapedString!)!) ?? "not alias"
         }
         
         reloadFileListFiles()
