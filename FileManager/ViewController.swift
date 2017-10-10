@@ -41,6 +41,7 @@ class ViewController: NSViewController {
     var dataSource1 : Table1!
     let urlMain = URL(string: "file:///Users/tomzhangle/From_Desktop/")
     var urlFile: URL?
+    var bottonClick: Bool = false
     let fm = FileManager.default
 
     //var currentFile: String?
@@ -60,12 +61,38 @@ class ViewController: NSViewController {
     
     //var witness: Witness?
     
+    func resolveBasicPath(at url: URL) -> String? {
+        do {
+            let resourceValues = try url.resourceValues(forKeys: [.isAliasFileKey])
+            var targetPath:String? = nil
+            //print(resourceValues)
+            if resourceValues.isAliasFile! {
+                //print(resourceValues.isAliasFile!)
+                let data = try NSURL.bookmarkData(withContentsOf:url)
+                //NSURLPathKey contains the target path.
+                let rv = NSURL.resourceValues(forKeys:[ URLResourceKey.pathKey ], fromBookmarkData: data)
+                targetPath = rv![URLResourceKey.pathKey] as! String?
+                
+                return targetPath
+                //let original = try URL(resolvingAliasFileAt: url)
+                //return original.path
+            }
+            
+        }catch  {
+            print(error)
+        }
+        return nil
+    }
+    
     func resolveFinderAlias(at url: URL) -> String? {
         do {
             let resourceValues = try url.resourceValues(forKeys: [.isAliasFileKey])
-            if resourceValues.isAliasFile! {
-                let original = try URL(resolvingAliasFileAt: url)
-                return original.path
+  
+                if resourceValues.isAliasFile! {
+
+                    let original = try URL(resolvingAliasFileAt: url)
+                    return original.path
+                
             }
             
         }catch  {
@@ -114,8 +141,9 @@ class ViewController: NSViewController {
         msg.messageText = title
         msg.informativeText = question
         
-        let txt = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        let txt = NSTextField(frame: NSRect(x: 0, y: 0, width: 400, height: 24))
         txt.stringValue = defaultValue
+       // txt.sizeToFit()
         
         msg.accessoryView = txt
         let response: NSModalResponse = msg.runModal()
@@ -232,6 +260,8 @@ class ViewController: NSViewController {
             if FileMove.shared.left {
                 directory = Directory(folderURL: self.urlMain!)
                 reloadFileList()
+                directoryFiles = nil
+                reloadFileListFiles()
             }
             else {
                 directoryFiles = Directory(folderURL: self.urlFile!)
@@ -248,22 +278,29 @@ class ViewController: NSViewController {
 
     @IBAction func buttonClicked(_ sender: Any) {
         
-        if FileMove.shared.path! == from
-        {
+        if !bottonClick {
+            bottonClick = true
+            
+            start = CFAbsoluteTimeGetCurrent()
+        }
+        else{
+            
             let elapsed = CFAbsoluteTimeGetCurrent() - start
             
             //Swift.print(elapsed)
-            if elapsed < 5 {
+            if elapsed < 3 {
                 resultField.stringValue = "too fast operation"
                 return
-                
             }
+            else {
+                start = CFAbsoluteTimeGetCurrent()
+            }
+            
         }
-        else
-        {
-            start = CFAbsoluteTimeGetCurrent()
-        }
-       
+        
+        
+        
+        
         from = FileMove.shared.path
         
 
@@ -318,12 +355,8 @@ class ViewController: NSViewController {
     func checkBack() {
         let newFile = FileMove.shared.backPath
         
-        let fileName = (newFile! as NSString).lastPathComponent
+        var fileName = (newFile! as NSString).lastPathComponent
 
-        
-        
-       
-        
         var aliasArray = fileChange.stringArray(forKey: "alias") ?? [String]()
         
         var compareArray: [String] = []
@@ -334,51 +367,61 @@ class ViewController: NSViewController {
         let escapedString = ("file://" + alias).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
          let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
             
+           // Swift.print(original!)
+            
             if (original != nil)
             {
               compareArray.append(original!)
             }
             else{
-                //Swift.print(escapedString!)
+              
+               let  basicPath = resolveBasicPath(at:URL(string: (escapedString)!)!)
+                let route = (basicPath! as NSString).deletingLastPathComponent
                 
-                do{
-                  let route = (alias as NSString).deletingLastPathComponent
-                  try fm.moveItem(atPath: newFile!, toPath: route + "/" + fileName)
-                    usleep(300000)
-                   let newOriginal = resolveFinderAlias(at: URL(string: (escapedString)!)!)
-                    if newOriginal != nil{
-                        
-                      resultField.stringValue = "Warning: Moved file to location"
-                        if route == "/Users/tomzhangle/From_Desktop" {
-                            reloadFileList()
-                        }
-                        else
-                        {
-                        let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-                            
-                            urlFile = URL(string:escaped!)
-                            directoryFiles = Directory(folderURL: urlFile!)
-                            reloadFileListFiles()
-                        }
+                let checkName = (basicPath! as NSString).lastPathComponent
+                
+            
+                if (checkName == fileName) {
+                    
+                    do{
+                    
+                        try fm.moveItem(atPath: newFile!, toPath: basicPath!)
+                        usleep(300000)
+                            resultField.stringValue = "Warning: Moved file to location"
+                            if route == "/Users/tomzhangle/From_Desktop" {
+                                reloadFileList()
+                            }
+                            else
+                            {
+                                let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+                                
+                                urlFile = URL(string:escaped!)
+                                directoryFiles = Directory(folderURL: urlFile!)
+                                reloadFileListFiles()
+                            }
                         
                     }
-                    else
-                    {
-                       try fm.moveItem(atPath:  route + "/" + fileName, toPath: newFile!)
-                       resultField.stringValue = "Error: Failed to move file back"
+                    catch {
+                        resultField.stringValue = "Error copying files"
                     }
                     
-                    try fm.removeItem(atPath: alias)
-                    
-                    let index = aliasArray.index(of: alias)
-                    aliasArray.remove(at:index!)
-                    fileChange.set(aliasArray, forKey: "alias")
-                    
-            }
-                catch {
-                    resultField.stringValue = "Error copying files"
+                }
+                else
+                {
+                    resultField.stringValue = "Error: Failed to move file back"
+ 
                 }
                 
+                
+                do {
+                     try fm.removeItem(atPath: alias)
+                }
+                catch {
+                    Swift.print(error)
+                }
+                let index = aliasArray.index(of: alias)
+                aliasArray.remove(at:index!)
+                fileChange.set(aliasArray, forKey: "alias")
                 return
             }
             
@@ -390,6 +433,15 @@ class ViewController: NSViewController {
             let index = compareArray.index(of: newFile!)
             let originalLocation = aliasArray[index!]
             let route = (originalLocation as NSString).deletingLastPathComponent
+            
+            let response = decideFileName(path:route + "/" + fileName)
+            
+            if response[0] == "txt" {
+                fileName = response[1]
+            }
+            else if response[0] == ""{
+                return
+            }
             
             do {
                 //directoryItemsFiles = try fm.contentsOfDirectory(atPath: rightPath)
@@ -403,6 +455,8 @@ class ViewController: NSViewController {
                 
                 resultField.stringValue = "file put back"
                 if route == "/Users/tomzhangle/From_Desktop" {
+                    
+                Swift.print("should refresh")
                    reloadFileList()
                 }
                 else
@@ -421,14 +475,92 @@ class ViewController: NSViewController {
             }
         }
         else {
-            
-            
-            
-            
+            putNormal(filePath: newFile!.removingPercentEncoding!)
+
         }
         
         
 }
+    func isFolder (atPath:String) -> Bool?{
+        
+        let escaped = ("file://" + atPath).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+        let u = URL(string: escaped!)
+        if let v = try? u!.resourceValues(forKeys: [.isDirectoryKey]) {
+            if v.isDirectory! {
+                return true
+            } else {
+               return false
+            }
+        } else {  
+            return nil
+        }
+    }
+    
+ func putNormal (filePath:String){
+    var fileName = ( filePath as NSString).lastPathComponent
+    
+    let ext = fileName.fileExtension()
+    
+    let folderName = ext.uppercased() + "S"
+    let basePath = "/Users/tomzhangle/From_Desktop/"
+    let route = basePath + folderName
+    
+    do {
+        if isFolder(atPath: filePath) == false{
+            if !fm.fileExists(atPath: route)
+            {
+  
+                try fm.createDirectory(atPath: route, withIntermediateDirectories: false)
+            }
+            
+            let response = decideFileName(path: route + "/" + fileName)
+            
+            if response[0] == "txt" {
+                fileName = response[1]
+            }
+            else if response[0] == ""{
+                return
+            }
+            
+            try fm.moveItem(atPath: filePath, toPath: route + "/" + fileName)
+            usleep(300000)
+            resultField.stringValue = "file put in place"
+            let escaped = (route).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+            urlFile = URL(string:escaped!)
+            directoryFiles = Directory(folderURL: urlFile!)
+            Swift.print(directoryFiles)
+            reloadFileListFiles()
+            Swift.print("I am not a folder")
+            
+        }
+        else if isFolder(atPath: filePath) == true{
+            
+            let response = decideFileName(path: basePath + "/" + fileName)
+            
+            if response[0] == "txt" {
+                fileName = response[1]
+            }
+            else if response[0] == ""{
+                return
+            }
+
+           try fm.moveItem(atPath: filePath, toPath: basePath + "/" + fileName)
+            reloadFileList()
+            
+        }
+        else {
+            return
+        }
+    }
+    catch {
+        
+        Swift.print (error)
+        
+    }
+    
+    
+}
+    
 
 func reloadFileListFiles() {
         directoryItemsFiles = directoryFiles?.contentsOrderedBy(sortOrder, ascending: sortAscending)
@@ -465,7 +597,7 @@ func updateFileView(){
         
         // 1
         let itemsSelected = tableView.selectedRow
-        Swift.print("select")
+        //Swift.print("select")
         //Swift.print(String(itemsSelected))
         
         if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
@@ -525,7 +657,7 @@ func updateFileView(){
         tableView.delegate = self
         tableView.dataSource = self
         
-        
+       // start = CFAbsoluteTimeGetCurrent()
         reloadFileList()
 
         
