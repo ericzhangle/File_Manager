@@ -39,25 +39,50 @@ class ViewController: NSViewController {
     var directoryItemsFiles: [Metadata]?
     var directoryFiles: Directory?
     var dataSource1 : Table1!
-    let urlMain = URL(string: "file:///Users/tomzhangle/From_Desktop/")
-    var urlFile: URL?
+    var urlLeft: URL?
+    var urlRight: URL?
     var bottonClick: Bool = false
     let fm = FileManager.default
+    var selectedFile: URL?
+    var selectedFileIsLeft: Bool = false
+    let baseURL = URL(string: "file:///Users/tomzhangle/From_Desktop")
+    
+   // var currentFolder: URL?
 
+    @IBOutlet weak var routeString: NSTextField!
+    
+    @IBAction func backStepClicked(_ sender: Any) {
+        
+        if urlLeft?.path != baseURL!.path{
+            // Swift.print(urlLeft)
+            //Swift.print(baseURL)
+            urlLeft = urlLeft?.deletingLastPathComponent()
+            
+            refreshAndReload(leftURL: urlLeft, rightURL: nil, lableURL: urlLeft,reloadLeft: true,reloadRight: true)
+            
+        }
+            
+        else {
+            resultField.stringValue = "End of the archive folder"
+        }
+    }
+    
+    
+    
     //var currentFile: String?
     let fileChange = UserDefaults.standard
-    var from: String?
+  
     
     var start: CFAbsoluteTime!
    
     @IBAction func deleteStorage(_ sender: Any) {
         let array: [String] = []
         
-        //myarray = []
         fileChange.set(array, forKey: "alias")
         
     }
     
+
     
     //var witness: Witness?
     
@@ -102,16 +127,7 @@ class ViewController: NSViewController {
     }
     
 
-    
 
-   // var SelectedPath: String = ""
-    
-   public var timePut: String = ""
-    
-   // var directoryFiles: Directory?
-    
-    //added
-    //var directoryItemsFiles: [String] = []
     var sortOrder = Directory.FileOrder.Name
     var sortAscending = true
     
@@ -119,13 +135,13 @@ class ViewController: NSViewController {
    
     @IBOutlet weak var fileView: NSTableView!
    
-
+/*
     override var representedObject: Any? {
         didSet {
             
             if let url = representedObject as? URL {
-               // Swift.print(url)
-                directory = Directory(folderURL: url)
+                 urlLeft = url
+               // directory = Directory(folderURL: url)
                 reloadFileList()
                 
             }
@@ -133,6 +149,8 @@ class ViewController: NSViewController {
 
         }
     }
+ */
+ 
     func getString(title: String, question: String, defaultValue: String) -> [String] {
         let msg = NSAlert()
         msg.addButton(withTitle: "OK")      // 1st button
@@ -165,6 +183,7 @@ class ViewController: NSViewController {
     }
     
     func decideFileName (path: String) -> [String] {
+        
         let fileName = (path as NSString).lastPathComponent
         let folder = (path as NSString).deletingLastPathComponent
         var newFileName = fileName
@@ -172,7 +191,7 @@ class ViewController: NSViewController {
         var fSuffix = 1
         var userFileName: String = newFileName
         var newUserFileName: String = ""
-        Swift.print(folder)
+        //Swift.print(folder)
         while  (newUserFileName == "" && fm.fileExists(atPath: folder + "/" + userFileName)) || (newUserFileName != "" && newUserFileName != userFileName && fm.fileExists(atPath: folder + "/" + newUserFileName) )
         {   if newUserFileName != "" {
             userFileName = newUserFileName
@@ -218,13 +237,13 @@ class ViewController: NSViewController {
     }
    
     func  moveFileToDeskTop (from: String, to: String) {
+
         
         let fileName = (to as NSString).lastPathComponent
         
         let oldName = (from as NSString).lastPathComponent
         let folder = (from as NSString).deletingLastPathComponent
       //  var newFileName = fileName
-
         do
         {
             try fm.moveItem(atPath: from, toPath: to)
@@ -257,15 +276,11 @@ class ViewController: NSViewController {
                 resultField.stringValue = "file name changed to :" + fileName
             }
             
-            if FileMove.shared.left {
-                directory = Directory(folderURL: self.urlMain!)
-                reloadFileList()
-                directoryFiles = nil
-                reloadFileListFiles()
+            if selectedFileIsLeft{
+                    refreshAndReload(leftURL: urlLeft, rightURL: nil, lableURL: urlLeft,reloadLeft: true,reloadRight: true)
             }
             else {
-                directoryFiles = Directory(folderURL: self.urlFile!)
-                reloadFileListFiles()
+                refreshAndReload(leftURL: urlLeft, rightURL: urlRight, lableURL: urlRight,reloadLeft:false,reloadRight:true)
             }
             
         } catch{
@@ -275,8 +290,7 @@ class ViewController: NSViewController {
         
     }
 
-
-    @IBAction func buttonClicked(_ sender: Any) {
+    @IBAction func loadToDesktopButtonClicked(_ sender: Any) {
         
         if !bottonClick {
             bottonClick = true
@@ -298,18 +312,14 @@ class ViewController: NSViewController {
             
         }
         
-        
-        
-        
-        from = FileMove.shared.path
-        
+        //var from: String?
 
         
-        if from != nil {
+        if selectedFile != nil {
             
-            let decodeFrom = from!.removingPercentEncoding
+            let decodeFrom = selectedFile!.path
             
-            let fileName = (decodeFrom! as NSString).lastPathComponent
+            let fileName = (decodeFrom as NSString).lastPathComponent
             
             let to = "/Users/tomzhangle/Desktop/"
             
@@ -325,7 +335,7 @@ class ViewController: NSViewController {
 
             let task:Process = Process()
                 
-           let aliasString = "make new alias file to (posix file \"" + decodeFrom! + "\") at POSIX file \"" + (decodeFrom! as NSString).deletingLastPathComponent + "\""
+           let aliasString = "make new alias file to (posix file \"" + decodeFrom + "\") at POSIX file \"" + (decodeFrom as NSString).deletingLastPathComponent + "\""
             
             // let aliasString = "make new alias file to (posix file \"" + decodeFrom! + "\") at desktop"
 
@@ -338,22 +348,41 @@ class ViewController: NSViewController {
                 Swift.print(aliasString)
                 task.launch()
                 usleep(300000)
-                moveFileToDeskTop(from: decodeFrom!, to: to + newFileName)
+                moveFileToDeskTop(from: decodeFrom, to: to + newFileName)
                 usleep(300000)
-                FileMove.shared.path = nil
+                selectedFile = nil
         }
         
     }
     
    // @IBOutlet weak var showFolders: NSScrollView!
     
-     func reloadFileList() {
-        directory = Directory(folderURL: urlMain!)
-        directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
-        tableView.reloadData()
+    func returnURL (path: String) -> URL?{
+           let escapedString = ("file://" + path).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+            
+            let resultURL = URL(string: escapedString!)
+            return resultURL
+ 
     }
+    
+    func checkFolder(folder: URL?){
+       // Swift.print("folder")
+       // Swift.print(folder)
+        //Swift.print(baseURL)
+        if folder?.path != baseURL!.path {
+            refreshAndReload(leftURL: folder!.deletingLastPathComponent(), rightURL: folder, lableURL: urlLeft,reloadLeft: true,reloadRight: true)
+        }
+        else{
+            refreshAndReload(leftURL: folder, rightURL: nil, lableURL: folder,reloadLeft: true,reloadRight: true)
+        }
+    }
+
     func checkBack() {
         let newFile = FileMove.shared.backPath
+        
+        if newFile == nil {
+            return
+        }
         
         var fileName = (newFile! as NSString).lastPathComponent
 
@@ -365,7 +394,7 @@ class ViewController: NSViewController {
         
             
         let escapedString = ("file://" + alias).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-         let original = resolveFinderAlias(at: URL(string: (escapedString)!)!)
+         let original = resolveFinderAlias(at: URL(string: escapedString!)!)
             
            // Swift.print(original!)
             
@@ -375,7 +404,10 @@ class ViewController: NSViewController {
             }
             else{
               
-               let  basicPath = resolveBasicPath(at:URL(string: (escapedString)!)!)
+               let  basicPath = resolveBasicPath(at:URL(string: escapedString!)!)
+                if basicPath == nil {
+                    return
+                }
                 let route = (basicPath! as NSString).deletingLastPathComponent
                 
                 let checkName = (basicPath! as NSString).lastPathComponent
@@ -388,18 +420,10 @@ class ViewController: NSViewController {
                         try fm.moveItem(atPath: newFile!, toPath: basicPath!)
                         usleep(300000)
                             resultField.stringValue = "Warning: Moved file to location"
-                            if route == "/Users/tomzhangle/From_Desktop" {
-                                reloadFileList()
-                            }
-                            else
-                            {
-                                let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-                                
-                                urlFile = URL(string:escaped!)
-                                directoryFiles = Directory(folderURL: urlFile!)
-                                reloadFileListFiles()
-                            }
-                        
+                        let folder = returnURL(path: route)
+   
+
+                        checkFolder(folder: folder)
                     }
                     catch {
                         resultField.stringValue = "Error copying files"
@@ -454,21 +478,9 @@ class ViewController: NSViewController {
                 fileChange.set(aliasArray, forKey: "alias")
                 
                 resultField.stringValue = "file put back"
-                if route == "/Users/tomzhangle/From_Desktop" {
-                    
-                Swift.print("should refresh")
-                   reloadFileList()
-                }
-                else
-                {
-                    
-                let escaped = route.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-                    
-                urlFile = URL(string:escaped!)
-                directoryFiles = Directory(folderURL: urlFile!)
-                reloadFileListFiles()
-                    
-                }
+                let folder = returnURL(path: route)
+                checkFolder(folder: folder)
+                //refreshAndReload(leftURL: folder, rightURL: nil, lableURL: folder,reloadLeft: true,reloadRight: true)
                 
             } catch {
                 resultField.stringValue = "\(error)"
@@ -484,6 +496,7 @@ class ViewController: NSViewController {
     func isFolder (atPath:String) -> Bool?{
         
         let escaped = ("file://" + atPath).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
+
         let u = URL(string: escaped!)
         if let v = try? u!.resourceValues(forKeys: [.isDirectoryKey]) {
             if v.isDirectory! {
@@ -502,8 +515,8 @@ class ViewController: NSViewController {
     let ext = fileName.fileExtension()
     
     let folderName = ext.uppercased() + "S"
-    let basePath = "/Users/tomzhangle/From_Desktop/"
-    let route = basePath + folderName
+    let basePath = baseURL?.path
+    let route = basePath! + "/" + folderName
     
     do {
         if isFolder(atPath: filePath) == false{
@@ -511,6 +524,8 @@ class ViewController: NSViewController {
             {
   
                 try fm.createDirectory(atPath: route, withIntermediateDirectories: false)
+                
+               // reloadFileList()
             }
             
             let response = decideFileName(path: route + "/" + fileName)
@@ -525,17 +540,13 @@ class ViewController: NSViewController {
             try fm.moveItem(atPath: filePath, toPath: route + "/" + fileName)
             usleep(300000)
             resultField.stringValue = "file put in place"
-            let escaped = (route).addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-            urlFile = URL(string:escaped!)
-            directoryFiles = Directory(folderURL: urlFile!)
-            Swift.print(directoryFiles)
-            reloadFileListFiles()
-            Swift.print("I am not a folder")
-            
+            let folder = returnURL(path: route)
+            checkFolder(folder: folder)
+           // refreshAndReload(leftURL: folder, rightURL: nil, lableURL: folder,reloadLeft: true,reloadRight: true)
         }
         else if isFolder(atPath: filePath) == true{
             
-            let response = decideFileName(path: basePath + "/" + fileName)
+            let response = decideFileName(path: basePath! + "/" + fileName)
             
             if response[0] == "txt" {
                 fileName = response[1]
@@ -544,8 +555,10 @@ class ViewController: NSViewController {
                 return
             }
 
-           try fm.moveItem(atPath: filePath, toPath: basePath + "/" + fileName)
-            reloadFileList()
+           try fm.moveItem(atPath: filePath, toPath: basePath! + "/" + fileName)
+           let folder = returnURL(path: basePath!)
+            checkFolder(folder: folder)
+           //refreshAndReload(leftURL: folder, rightURL: nil, lableURL: folder,reloadLeft: true,reloadRight: true)
             
         }
         else {
@@ -561,35 +574,85 @@ class ViewController: NSViewController {
     
 }
     
-
+    func refreshAndReload (leftURL: URL?,rightURL: URL?, lableURL: URL?, reloadLeft: Bool, reloadRight:Bool){
+        
+        urlLeft = leftURL
+        urlRight = rightURL
+        if urlLeft != nil {
+            directory = Directory(folderURL: urlLeft!)
+            directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
+        }
+        else{
+            directoryItems = nil
+        }
+        if reloadLeft {
+            tableView.reloadData()
+        }
+        if urlRight != nil{
+            directoryFiles = Directory(folderURL: urlRight!)
+            directoryItemsFiles = directoryFiles?.contentsOrderedBy(sortOrder, ascending: sortAscending)
+            self.dataSource1.paths = directoryItemsFiles
+        }
+        else {
+            self.dataSource1.paths = nil
+        }
+        if reloadRight{
+            fileView.reloadData()
+        }
+        
+        updateRouteString(route: lableURL)
+    }
+    /*
+func reloadFileList() {
+        let route = urlMain!.path
+    
+        updateRouteString(route: route)
+    
+    }*/
+/*
 func reloadFileListFiles() {
+        let route = urlFile?.path ?? ""
+        updateRouteString(route: route)
         directoryItemsFiles = directoryFiles?.contentsOrderedBy(sortOrder, ascending: sortAscending)
         self.dataSource1.paths = directoryItemsFiles ?? []
+        Swift.print(directoryItemsFiles)
         //Swift.print("result:" + String(self.dataSource1.paths?.count ?? 0))
         fileView.reloadData()
     }
-    
+ */
+
 func updateFileView(){
         let itemsSelected = fileView.selectedRow
         
         //Swift.print(String(itemsSelected))
     if  !(itemsSelected >= 0 && itemsSelected < directoryItemsFiles!.count) {
-        FileMove.shared.path = nil
-        FileMove.shared.left = false
+        selectedFile = nil
+        selectedFileIsLeft = false
         return
     }
         let item = directoryItemsFiles![itemsSelected]
         
-        let urlString = directoryFiles!.url.path + "/" + item.name
+        selectedFile = item.url
+    
+        selectedFileIsLeft = false
+    
+    refreshAndReload(leftURL: urlLeft, rightURL: urlRight, lableURL: selectedFile,reloadLeft: false,reloadRight:false )
+    
+      // directoryFiles!.url.path + "/" + item.name
+       // let escapedString = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
         
-        let escapedString = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-        
-        FileMove.shared.path = escapedString
-        FileMove.shared.left = false
-
+       // FileMove.shared.path = escapedString
+       // FileMove.shared.left = false
+       // routeString.stringValue = urlString
+       //updateRouteString(route: urlString)
        // Swift.print(escapedString!)
     }
     
+    func updateRouteString (route: URL?) {
+        
+        routeString.stringValue = route?.path ?? "";
+        routeString.sizeToFit()
+    }
     
     func updateStatus() {
         
@@ -601,47 +664,82 @@ func updateFileView(){
         //Swift.print(String(itemsSelected))
         
         if  !(itemsSelected >= 0 && itemsSelected < directoryItems!.count) {
-            FileMove.shared.path = nil
-            FileMove.shared.left = true
+            selectedFile = nil
+           selectedFileIsLeft = true
                 return
         }
         let item = directoryItems![itemsSelected]
         
-        let urlString = directory!.url.path + "/" + item.name
+       // Swift.print(item.name)
+        selectedFile = item.url
         
-        let escapedString = urlString.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)
-        
-        FileMove.shared.path = escapedString
-        
-        FileMove.shared.left = true
-        
-        //FileMove.shared.printPath()
-        
-        
-        // self.SelectedPath = escapedString!
-       // Swift.print(self.SelectedPath)
+       selectedFileIsLeft = true
+
         if item.isFolder {
             
             //let newURL = URL(string: "file:///Users/tomzhangle/Desktop/" + item.name)
-            
-        
-                 urlFile = URL(string: escapedString!)
-                directoryFiles = Directory(folderURL: urlFile!)
-
+            refreshAndReload(leftURL: urlLeft, rightURL: selectedFile, lableURL: selectedFile,reloadLeft: false,reloadRight: true)
  
         }else {
-            directoryFiles = nil
+           refreshAndReload(leftURL: urlLeft, rightURL: nil, lableURL: selectedFile,reloadLeft: false,reloadRight: true)
             
-           // resultField.stringValue = resolveFinderAlias(at: URL(string: "file://" + escapedString!)!) ?? "not alias"
         }
-        
-        reloadFileListFiles()
-
+        /*
+        directoryItemsFiles = directoryFiles?.contentsOrderedBy(sortOrder, ascending: sortAscending)
+        self.dataSource1.paths = directoryItemsFiles ?? []
+        Swift.print(directoryItemsFiles)
+        //Swift.print("result:" + String(self.dataSource1.paths?.count ?? 0))
+        fileView.reloadData()
+*/
        // resultField.stringValue = filePath
 }
+    
+   func tableViewDoubleClick(_ sender:AnyObject) {
+    //Swift.print ("double clicked")
+        
+       // Swift.print("double clicked")
+
+   
+        guard tableView.selectedRow >= 0 && tableView.selectedRow < directoryItems!.count ,
+            let item = directoryItems?[tableView.selectedRow] else {
+                return
+        }
+    
+        if item.isFolder {
+            
+            // 2
+           // self.representedObject = item.url as Any
+            
+            refreshAndReload(leftURL: item.url, rightURL: nil, lableURL: item.url, reloadLeft: true, reloadRight: true)
+        }
+        else {
+            // 3
+            NSWorkspace.shared().open(item.url as URL)
+        }
+ 
+    }
+    
+    func fileViewDoubleClick(_ sender:AnyObject) {
+        
+        guard fileView.selectedRow >= 0 && tableView.selectedRow < directoryItemsFiles!.count ,
+            let item = directoryItemsFiles?[fileView.selectedRow] else {
+                return
+        }
+        
+        if item.isFolder {
+            
+            
+            refreshAndReload(leftURL: item.url, rightURL: nil, lableURL: item.url, reloadLeft: true, reloadRight: true)
+        }
+        else {
+            // 3
+            NSWorkspace.shared().open(item.url as URL)
+        }
+        
+    }
+    
 
     func tableViewSelectionDidChange(_ notification: Notification) {
-       // Swift.print("update")
         updateStatus()
         }
     
@@ -656,17 +754,22 @@ func updateFileView(){
         
         tableView.delegate = self
         tableView.dataSource = self
-        
+        urlLeft = URL(string: "file:///Users/tomzhangle/From_Desktop")
+        urlRight = nil
        // start = CFAbsoluteTimeGetCurrent()
-        reloadFileList()
-
+  
+        tableView.target = self
+        
+        fileView.target = self.dataSource1
+        
+        tableView.doubleAction = #selector(tableViewDoubleClick(_:))
+        fileView.doubleAction = #selector(fileViewDoubleClick(_:))
         
         self.dataSource1 = Table1()
-        self.dataSource1.paths = []
+       // self.dataSource1.paths = nil
         fileView.dataSource = self.dataSource1
         fileView.delegate = self.dataSource1
         
-        NotificationCenter.default.addObserver(self, selector: #selector(self.reloadFileList),name:NSNotification.Name(rawValue: "refresh"), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateFileView),name:NSNotification.Name(rawValue: "fileSelected"), object: nil)
          NotificationCenter.default.addObserver(self, selector: #selector(self.checkBack),name:NSNotification.Name(rawValue: "checkBack"), object: nil)
@@ -675,7 +778,7 @@ func updateFileView(){
         
         //Screen%20Shot%202017%2D10%2D04%20at%209.57.42%20AM.png%20alias"
         let array = fileChange.stringArray(forKey: "alias") ?? [String]()
-
+         refreshAndReload(leftURL: urlLeft, rightURL: nil, lableURL: urlLeft,reloadLeft: true,reloadRight: true)
         //Swift.print(resolveFinderAlias(at: URL(string: (escapedString))!) ?? "not found")
         Swift.print(array)
         }

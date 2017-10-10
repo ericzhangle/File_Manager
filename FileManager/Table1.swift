@@ -10,7 +10,7 @@ import Cocoa
 
 class Table1: NSTableView, NSTableViewDataSource, NSTableViewDelegate
     
-{   public var paths: [Metadata]? = []
+{   public var paths: [Metadata]?
     var cellIdentifier: String = ""
     
     override func draw(_ dirtyRect: NSRect)

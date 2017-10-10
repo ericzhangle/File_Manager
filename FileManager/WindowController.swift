@@ -9,6 +9,7 @@
 import Cocoa
 
 class WindowController: NSWindowController {
+    /*
 
     @IBAction func openDocument(_ sender: AnyObject?) {
         
@@ -24,6 +25,7 @@ class WindowController: NSWindowController {
             self.contentViewController?.representedObject = openPanel.url
         }
     }
+ */
 
 
 }
