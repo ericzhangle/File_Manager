@@ -16,6 +16,13 @@ class NSViewNew: NSView {
         super.draw(dirtyRect)
     }
     
+    override func keyDown(with: NSEvent) {
+        if with.keyCode == 51{
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "checkDelete"), object: nil)
+        }
+    }
+    
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         // Declare and register an array of accepted types
@@ -81,7 +88,7 @@ class NSViewNew: NSView {
             // THIS IS WERE YOU GET THE PATH FOR THE DROPPED FILE
             droppedFilePath = imagePath
             
-            let fileName = (droppedFilePath! as NSString).lastPathComponent
+          //  let fileName = (droppedFilePath! as NSString).lastPathComponent
             
             FileMove.shared.backPath = droppedFilePath!
             

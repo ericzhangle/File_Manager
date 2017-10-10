@@ -48,6 +48,8 @@ class ViewController: NSViewController {
     let baseURL = URL(string: "file:///Users/tomzhangle/From_Desktop")
     
    // var currentFolder: URL?
+    
+    
 
     @IBOutlet weak var routeString: NSTextField!
     
@@ -150,6 +152,28 @@ class ViewController: NSViewController {
         }
     }
  */
+    func confirmDelete(filePath: URL) -> Bool {
+        let msg = NSAlert()
+        msg.addButton(withTitle: "OK")      // 1st button
+       // msg.addButton(withTitle: "Replace") // 2st button
+        msg.addButton(withTitle: "Cancel")  // 3nd button
+        msg.messageText = "Confirm Delete"
+        msg.informativeText = "Please confirm to Delete file:" + filePath.lastPathComponent
+        
+        let response: NSModalResponse = msg.runModal()
+        
+        if (response == NSAlertFirstButtonReturn) {
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
+    
+    
+    
+    
  
     func getString(title: String, question: String, defaultValue: String) -> [String] {
         let msg = NSAlert()
@@ -737,7 +761,38 @@ func updateFileView(){
         }
         
     }
-    
+    func checkDelete (){
+        if selectedFile == nil{
+            return
+        }
+        else{
+            
+            let response = confirmDelete(filePath:selectedFile!)
+            if !response {
+                return
+            }
+            else {
+                do {
+                    try fm.removeItem(at: selectedFile!)
+                    if selectedFileIsLeft{
+                        refreshAndReload(leftURL: urlLeft, rightURL: nil, lableURL: urlLeft, reloadLeft: true, reloadRight: true)
+                    }
+                    else{
+                        refreshAndReload(leftURL: urlLeft, rightURL: urlRight, lableURL: urlLeft, reloadLeft: false, reloadRight: true)
+                    }
+                    
+                    
+                }
+                catch {
+                    Swift.print(error)
+                }
+                
+                
+            }
+        }
+        
+        
+    }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
         updateStatus()
@@ -769,7 +824,7 @@ func updateFileView(){
        // self.dataSource1.paths = nil
         fileView.dataSource = self.dataSource1
         fileView.delegate = self.dataSource1
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.checkDelete),name:NSNotification.Name(rawValue: "checkDelete"), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateFileView),name:NSNotification.Name(rawValue: "fileSelected"), object: nil)
          NotificationCenter.default.addObserver(self, selector: #selector(self.checkBack),name:NSNotification.Name(rawValue: "checkBack"), object: nil)

@@ -660,54 +660,51 @@
             </objects>
             <point key="canvasLocation" x="-113" y="-259"/>
         </scene>
+        <!--Main Window View-->
+        <scene sceneID="HBG-0P-tqr">
+            <objects>
+                <viewController id="2wN-vn-fIH" customClass="mainWindowView" customModule="FileManager" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="Kaa-iL-9DO" customClass="nsVIewControll" customModule="FileManager" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="60" height="40"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y3B-Q5-mcM">
+                                <rect key="frame" x="18" y="0.0" width="37" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="+" id="cmE-An-kHZ">
+                                    <font key="font" metaFont="system" size="21"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="GGw-ub-SK4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="141" y="-169"/>
+        </scene>
         <!--Window Controller-->
         <scene sceneID="Qxu-KS-rfp">
             <objects>
-                <windowController id="dU7-BC-188" sceneMemberID="viewController">
-                    <window key="window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="20W-CZ-zzb">
-                        <windowStyleMask key="styleMask" titled="YES"/>
+                <windowController id="dU7-BC-188" customClass="WindowController" customModule="FileManager" customModuleProvider="target" sceneMemberID="viewController">
+                    <window key="window" identifier="MyWindowControllerIdentifier" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="20W-CZ-zzb" customClass="WindowSub" customModule="FileManager" customModuleProvider="target">
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="111" y="133" width="60" height="40"/>
+                        <rect key="contentRect" x="111" y="133" width="85" height="42"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1024" height="617"/>
                     </window>
                     <connections>
-                        <segue destination="TaD-wv-biT" kind="relationship" relationship="window.shadowedContentViewController" id="NH5-6j-LhD"/>
+                        <segue destination="2wN-vn-fIH" kind="relationship" relationship="window.shadowedContentViewController" id="Qms-aL-nzu"/>
                     </connections>
                 </windowController>
                 <customObject id="iaj-8R-0RS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5" y="-104"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="J9s-lW-PLj">
-            <objects>
-                <viewController id="TaD-wv-biT" sceneMemberID="viewController">
-                    <view key="view" id="rl9-aB-aa3">
-                        <rect key="frame" x="0.0" y="0.0" width="69" height="43"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gye-WD-bcm">
-                                <rect key="frame" x="0.0" y="-1" width="69" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="who-ZL-QBC">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <segue destination="B8D-0N-5wS" kind="show" id="tcR-A7-G99"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                    </view>
-                </viewController>
-                <customObject id="RtS-0s-DQ2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="231" y="-163"/>
+            <point key="canvasLocation" x="-31.5" y="-108"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
             <objects>
-                <windowController id="B8D-0N-5wS" customClass="WindowController" customModule="FileManager" customModuleProvider="target" sceneMemberID="viewController">
+                <windowController storyboardIdentifier="mainWindows" id="B8D-0N-5wS" sceneMemberID="viewController">
                     <window key="window" title="File Manager" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
@@ -717,12 +714,12 @@
                         <value key="maxSize" type="size" width="500" height="310"/>
                     </window>
                     <connections>
-                        <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
+                        <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="P8z-8N-cAS"/>
                     </connections>
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="121" y="167"/>
+            <point key="canvasLocation" x="117" y="243"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -987,6 +984,5 @@
     </scenes>
     <resources>
         <image name="NSActionTemplate" width="14" height="14"/>
-        <image name="NSAddTemplate" width="11" height="11"/>
     </resources>
 </document>
